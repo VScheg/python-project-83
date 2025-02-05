@@ -1,0 +1,60 @@
+{% extends "base/layout.html" %}
+
+{% block content %}
+<div class="container-lg mt-3">
+      <h1>Сайт: {{ url_info.get('url') }}</h1>
+
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover text-nowrap" data-test="url">
+      <tbody>
+        <tr>
+          <td>ID</td>
+          <td>{{ url_info.get('id') }}</td>
+        </tr>
+        <tr>
+          <td>Имя</td>
+          <td>{{ url_info.get('url') }}</td>
+        </tr>
+        <tr>
+          <td>Дата создания</td>
+          <td>{{ url_info.get('created_at') }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+    <h2 class="mt-5 mb-3">Проверки</h2>
+    <form method="post" action="{{ url_for('url_checks', id=url_info.get('id')) }}">
+    <input type="submit" class="btn btn-primary" value="Запустить проверку">
+    </form>
+
+  <div>
+    <table class="table table-bordered table-hover mt-2" data-test="checks">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Код ответа</th>
+        <th>h1</th>
+        <th>title</th>
+        <th>description</th>
+        <th>Дата создания</th>
+      </tr>
+    </thead>
+      <tbody>
+      {% for check in checks %}
+      <tr>
+        <td>{{ check.get('id') }}</td>
+        <td>{{ check.get('status_code') }}</td>
+        <td>{{ check.get('h1') }}</td>
+        <td>{{ check.get('title') }}</td>
+        <td>{{ check.get('description') }}</td>
+        <td>{{ check.get('created_at') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    </table>
+  </div>
+
+    </div>
+{% endblock %}

@@ -23,3 +23,8 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 def index():
     messages = get_flashed_messages(with_categories=True)
     return render_template('base/index.html', messages=messages)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
