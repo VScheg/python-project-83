@@ -82,3 +82,13 @@ def url_checks(id):
         flash('Произошла ошибка при проверке', 'danger')
 
     return redirect(url_for('show_info', id=id))
+
+
+@app.route('/urls')
+def show_urls():
+    urls = repo.show_urls()
+    for url in urls:
+        for key, value in url.items():
+            if value is None:
+                url[key] = ''
+    return render_template('index.html', urls=urls)

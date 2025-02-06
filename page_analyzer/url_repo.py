@@ -56,3 +56,20 @@ class UrlRepository:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute("SELECT * FROM checks WHERE url_id = %s", (url_id,))
                 return cur.fetchall()
+
+    def show_urls(self):
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute(
+                    """SELECT 
+                    urls.id AS id, 
+                    urls.url AS url, 
+                    checks.created_at AS last_check, 
+                    checks.status_code AS status_code 
+                    FROM urls LEFT JOIN checks ON urls.id = checks.url_id
+                    WHERE checks.id IS NULL OR checks.id = (
+                    SELECT MAX(id) FROM checks WHERE url_id = urls.id
+                    )
+                    ORDER BY id DESC"""
+                )
+                return cur.fetchall()
