@@ -1,16 +1,5 @@
 #!/usr/bin/env bash
-set -e
-
-echo "🔹 Устанавливаем uv..."
+# скачиваем uv и запускаем команду установки зависимостей
 curl -LsSf https://astral.sh/uv/install.sh | sh
-
-echo "🔹 Добавляем $HOME/.local/bin в PATH..."
-export PATH="$HOME/.local/bin:$PATH"
-
-echo "🔹 Проверяем путь к gunicorn..."
-which gunicorn || echo "⚠️ gunicorn не найден в PATH"
-
-echo "🔹 Устанавливаем зависимости..."
-make install
-
-echo "✅ Сборка завершена!"
+source $HOME/.local/bin/env
+make install && psql -a -d $DATABASE_URL -f database.sql
