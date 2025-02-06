@@ -10,4 +10,5 @@ dependencies = [
     "psycopg2>=2.9.10",
     "python-dotenv>=1.0.1",
     "ruff>=0.9.4",
+    "validators>=0.34.0",
 ]
