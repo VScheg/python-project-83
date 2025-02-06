@@ -72,3 +72,13 @@ def show_info(id):
         return render_template('show.html', url_info=url_info, checks=checks, messages=messages)
     except:
         return render_template('404.html'), 404
+
+
+@app.route('/urls/<id>/checks', methods=['POST'])
+def url_checks(id):
+    try:
+        repo.add_check(id)
+    except:
+        flash('Произошла ошибка при проверке', 'danger')
+
+    return redirect(url_for('show_info', id=id))

@@ -1,5 +1,6 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from page_analyzer.parser import parse
 
 
 class UrlRepository:
@@ -21,7 +22,6 @@ class UrlRepository:
             conn.commit()
         return id
 
-
     def url_info(self, url_id):
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -33,3 +33,26 @@ class UrlRepository:
             with conn.cursor() as cur:
                 cur.execute("SELECT id FROM urls WHERE url = %s", (url,))
                 return cur.fetchone()[0]
+
+    def add_check(self, url_id):
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT url FROM urls WHERE id = %s",
+                    (url_id,)
+                )
+                url = cur.fetchone()[0]
+                url_check = parse(url)
+                cur.execute(
+                    "INSERT INTO checks (status_code, url_id, h1, title, description) VALUES (%s, %s, %s, %s, %s)",
+                    (url_check.get('status_code'), url_id, url_check.get('h1'), url_check.get('title'), url_check.get('description'))
+                )
+
+            conn.commit()
+        return None
+
+    def show_checks(self, url_id):
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("SELECT * FROM checks WHERE url_id = %s", (url_id,))
+                return cur.fetchall()
