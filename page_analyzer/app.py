@@ -41,7 +41,7 @@ def normalize_url(url):
     return parsed.scheme + '://' + parsed.netloc
 
 
-@app.route('/', methods=['POST'])
+@app.route('/urls', methods=['POST'])
 def url_post():
     data = request.form.to_dict()
     urls_data = repo.show_urls()
@@ -60,7 +60,8 @@ def url_post():
         return redirect(url_for('show_info', id=id))
     else:
         flash('Некорректный URL', 'danger')
-        return redirect(url_for('index'))
+        messages = get_flashed_messages(with_categories=True)
+        return render_template('base/index.html', messages=messages), 422
 
 
 @app.route('/urls/<id>', methods=['GET', 'POST'])
