@@ -70,7 +70,12 @@ def show_info(id):
         messages = get_flashed_messages(with_categories=True)
         url_info = repo.url_info(id)
         checks = repo.show_checks(id)
-        return render_template('show.html', url_info=url_info, checks=checks, messages=messages)
+        return render_template(
+            'show.html',
+            url_info=url_info,
+            checks=checks,
+            messages=messages
+        )
     except BaseException:
         return render_template('404.html'), 404
 

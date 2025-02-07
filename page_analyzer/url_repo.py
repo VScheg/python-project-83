@@ -44,8 +44,16 @@ class UrlRepository:
                 url = cur.fetchone()[0]
                 url_check = parse(url)
                 cur.execute(
-                    "INSERT INTO checks (status_code, url_id, h1, title, description) VALUES (%s, %s, %s, %s, %s)",
-                    (url_check.get('status_code'), url_id, url_check.get('h1'), url_check.get('title'), url_check.get('description'))
+                    """INSERT INTO checks
+                    (status_code, url_id, h1, title, description)
+                    VALUES (%s, %s, %s, %s, %s)""",
+                    (
+                        url_check.get('status_code'),
+                        url_id,
+                        url_check.get('h1'),
+                        url_check.get('title'),
+                        url_check.get('description')
+                    )
                 )
 
             conn.commit()
