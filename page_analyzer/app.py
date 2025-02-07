@@ -70,7 +70,7 @@ def show_info(id):
         url_info = repo.url_info(id)
         checks = repo.show_checks(id)
         return render_template('show.html', url_info=url_info, checks=checks, messages=messages)
-    except:
+    except BaseException:
         return render_template('404.html'), 404
 
 
@@ -78,7 +78,8 @@ def show_info(id):
 def url_checks(id):
     try:
         repo.add_check(id)
-    except:
+        flash('Страница успешно проверена', 'success')
+    except BaseException:
         flash('Произошла ошибка при проверке', 'danger')
 
     return redirect(url_for('show_info', id=id))
