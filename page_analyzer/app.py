@@ -38,7 +38,7 @@ def page_not_found(e):
 
 def normalize_url(url):
     parsed = urlparse(url)
-    return parsed.scheme + '://' + parsed.netloc
+    return f'{parsed.scheme}://{parsed.netloc}'.lower()
 
 
 @app.route('/urls', methods=['POST'])
