@@ -10,10 +10,8 @@ from flask import (
 
 import os
 from dotenv import load_dotenv
-
+from page_analyzer.validator import validate_url, normalize_url
 from page_analyzer.url_repo import UrlRepository
-from validators.url import url as validate
-from urllib.parse import urlparse
 
 
 load_dotenv()
@@ -36,17 +34,12 @@ def page_not_found(e):
     return render_template('404.html'), 404
 
 
-def normalize_url(url):
-    parsed = urlparse(url)
-    return f'{parsed.scheme}://{parsed.netloc}'.lower()
-
-
 @app.route('/urls', methods=['POST'])
 def url_post():
     data = request.form.to_dict()
     urls_data = repo.show_urls()
     url = data.get('url')
-    if validate(url):
+    if validate_url(url):
         normalized_url = normalize_url(url)
         for item in urls_data:
             if normalized_url == item.get('url'):
@@ -66,18 +59,19 @@ def url_post():
 
 @app.route('/urls/<id>', methods=['GET', 'POST'])
 def show_info(id):
-    try:
-        messages = get_flashed_messages(with_categories=True)
-        url_info = repo.url_info(id)
-        checks = repo.show_checks(id)
-        return render_template(
-            'show.html',
-            url_info=url_info,
-            checks=checks,
-            messages=messages
-        )
-    except BaseException:
+    messages = get_flashed_messages(with_categories=True)
+    url_info = repo.url_info(id)
+
+    if url_info is None:
         return render_template('404.html'), 404
+
+    checks = repo.show_checks(id)
+    return render_template(
+        'show.html',
+        url_info=url_info,
+        checks=checks,
+        messages=messages
+    )
 
 
 @app.route('/urls/<id>/checks', methods=['POST'])
@@ -85,7 +79,7 @@ def url_checks(id):
     try:
         repo.add_check(id)
         flash('Страница успешно проверена', 'success')
-    except BaseException:
+    except Exception:
         flash('Произошла ошибка при проверке', 'danger')
 
     return redirect(url_for('show_info', id=id))

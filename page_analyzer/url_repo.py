@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from page_analyzer.parser import parse
+from page_analyzer.html_parser import parse_html
 
 
 class UrlRepository:
@@ -42,7 +42,7 @@ class UrlRepository:
                     (url_id,)
                 )
                 url = cur.fetchone()[0]
-                url_check = parse(url)
+                url_check = parse_html(url)
                 cur.execute(
                     """INSERT INTO checks
                     (status_code, url_id, h1, title, description)
