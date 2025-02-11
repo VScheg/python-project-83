@@ -43,7 +43,6 @@ class UrlRepository:
                 return cur.fetchone()[0]
 
 
-
 class CheckRepository:
     def __init__(self, db_url):
         self.db_url = db_url
