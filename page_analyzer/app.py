@@ -11,6 +11,7 @@ from flask import (
 import os
 from dotenv import load_dotenv
 from page_analyzer.validator import validate_url, normalize_url
+from page_analyzer.html_parser import parse_html
 from page_analyzer.url_repo import UrlRepository
 
 
@@ -77,7 +78,9 @@ def show_info(id):
 @app.route('/urls/<id>/checks', methods=['POST'])
 def url_checks(id):
     try:
-        repo.add_check(id)
+        url = repo.get_url(id)
+        url_check = parse_html(url)
+        repo.add_check(url_check, id)
         flash('Страница успешно проверена', 'success')
     except Exception:
         flash('Произошла ошибка при проверке', 'danger')
