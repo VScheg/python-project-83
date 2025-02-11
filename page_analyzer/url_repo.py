@@ -50,7 +50,7 @@ class UrlRepository:
                 )
             )
 
-            self.conn.commit()
+        self.conn.commit()
         return None
 
     def show_checks(self, url_id):
