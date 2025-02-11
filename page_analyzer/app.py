@@ -10,9 +10,10 @@ from flask import (
 
 import os
 from dotenv import load_dotenv
+
 from page_analyzer.validator import validate_url, normalize_url
 from page_analyzer.html_parser import parse_html
-from page_analyzer.url_repo import UrlRepository
+from page_analyzer.repo import UrlRepository, CheckRepository
 
 
 load_dotenv()
@@ -21,7 +22,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 DATABASE_URL = os.getenv('DATABASE_URL')
 
-repo = UrlRepository(DATABASE_URL)
+url_repo = UrlRepository(DATABASE_URL)
+check_repo = CheckRepository(DATABASE_URL)
 
 
 @app.route('/')
@@ -38,17 +40,17 @@ def page_not_found(e):
 @app.route('/urls', methods=['POST'])
 def url_post():
     data = request.form.to_dict()
-    urls_data = repo.show_urls()
+    urls_data = check_repo.show_urls()
     url = data.get('url')
     if validate_url(url):
         normalized_url = normalize_url(url)
         for item in urls_data:
             if normalized_url == item.get('url'):
-                id = repo.get_url_id(normalized_url)
+                id = url_repo.get_url_id(normalized_url)
                 flash('Страница уже существует', 'info')
                 break
         else:
-            id = repo.add_url(normalized_url)
+            id = url_repo.add_url(normalized_url)
             flash('Страница успешно добавлена', 'success')
 
         return redirect(url_for('show_info', id=id))
@@ -61,12 +63,12 @@ def url_post():
 @app.route('/urls/<id>', methods=['GET', 'POST'])
 def show_info(id):
     messages = get_flashed_messages(with_categories=True)
-    url_info = repo.url_info(id)
+    url_info = url_repo.url_info(id)
 
     if url_info is None:
         return render_template('404.html'), 404
 
-    checks = repo.show_checks(id)
+    checks = check_repo.show_checks(id)
     return render_template(
         'show.html',
         url_info=url_info,
@@ -78,9 +80,9 @@ def show_info(id):
 @app.route('/urls/<id>/checks', methods=['POST'])
 def url_checks(id):
     try:
-        url = repo.get_url(id)
+        url = url_repo.get_url(id)
         url_check = parse_html(url)
-        repo.add_check(url_check, id)
+        check_repo.add_check(url_check, id)
         flash('Страница успешно проверена', 'success')
     except Exception:
         flash('Произошла ошибка при проверке', 'danger')
@@ -90,7 +92,7 @@ def url_checks(id):
 
 @app.route('/urls')
 def show_urls():
-    urls = repo.show_urls()
+    urls = check_repo.show_urls()
     for url in urls:
         for key, value in url.items():
             if value is None:

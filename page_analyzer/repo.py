@@ -42,6 +42,15 @@ class UrlRepository:
                 )
                 return cur.fetchone()[0]
 
+
+
+class CheckRepository:
+    def __init__(self, db_url):
+        self.db_url = db_url
+
+    def get_connection(self):
+        return psycopg2.connect(self.db_url)
+
     def add_check(self, url_check, url_id):
         with self.get_connection() as conn:
             with conn.cursor() as cur:
