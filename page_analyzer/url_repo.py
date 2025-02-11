@@ -14,7 +14,7 @@ class UrlRepository:
             )
             id = cur.fetchone()[0]
 
-        self.conn.commit()
+            self.conn.commit()
         return id
 
     def url_info(self, url_id):
