@@ -39,6 +39,13 @@ def page_not_found(e):
 
 @app.route('/urls', methods=['POST'])
 def url_post():
+    """
+    Get url from user,
+    validate and normalize url,
+    add to database if needed,
+    redirect to url page if url validated,
+    flash messages depending on url validation and presence in database
+    """
     data = request.form.to_dict()
     urls_data = check_repo.show_urls()
     url = data.get('url')
@@ -61,7 +68,7 @@ def url_post():
 
 
 @app.route('/urls/<int:id>', methods=['GET', 'POST'])
-def show_info(id):
+def show_info(id: int):
     messages = get_flashed_messages(with_categories=True)
     url_info = url_repo.url_info(id)
 
@@ -78,7 +85,7 @@ def show_info(id):
 
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
-def add_check(id):
+def add_check(id: int):
     try:
         url = url_repo.get_url(id)
         url_check = parse_html(url)

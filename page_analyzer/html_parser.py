@@ -2,7 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def parse_html(url):
+def parse_html(url: str) -> dict:
+    """
+    Get from HTML page SEO parameters - h1, title, description and status code.
+    """
     response = requests.get(url)
     response.raise_for_status()
     soup = BeautifulSoup(response.content, 'html.parser')
