@@ -60,7 +60,7 @@ def url_post():
         return render_template('base/index.html', messages=messages), 422
 
 
-@app.route('/urls/<id>', methods=['GET', 'POST'])
+@app.route('/urls/<int:id>', methods=['GET', 'POST'])
 def show_info(id):
     messages = get_flashed_messages(with_categories=True)
     url_info = url_repo.url_info(id)
@@ -77,8 +77,8 @@ def show_info(id):
     )
 
 
-@app.route('/urls/<id>/checks', methods=['POST'])
-def url_checks(id):
+@app.route('/urls/<int:id>/checks', methods=['POST'])
+def add_check(id):
     try:
         url = url_repo.get_url(id)
         url_check = parse_html(url)
