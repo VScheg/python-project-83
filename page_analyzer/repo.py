@@ -72,7 +72,8 @@ class CheckRepository:
         Args:
             query: The query to execute.
             params: The parameters to pass to the query.
-            fetchone: Determines whether to fetch the first row from the database or fetch all rows.
+            fetchone: Determines whether to fetch the first row
+            from the database or fetch all rows.
             need_return: Determines whether to return a result or not.
             cursor_factory: Optional cursor factory.
 
