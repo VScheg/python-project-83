@@ -44,7 +44,7 @@ def url_post():
     validate and normalize url,
     add to database if needed,
     redirect to url page if url validated,
-    flash messages depending on url validation and presence in database
+    flash messages depending on url validation and presence in database.
     """
     data = request.form.to_dict()
     urls_data = check_repo.show_urls()
@@ -86,6 +86,12 @@ def show_info(id: int):
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def add_check(id: int):
+    """
+    Check the url,
+    if no exceptions, add results of the check to the database,
+    show page with url and checks information,
+    flash messages depending on presence of exceptions.
+    """
     try:
         url = url_repo.get_url(id)
         url_check = parse_html(url)

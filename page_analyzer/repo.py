@@ -31,6 +31,14 @@ class UrlRepository:
         return result
 
     def add_url(self, url: str) -> int:
+        """
+        Adds a new url to the database.
+        Args:
+            url: Url to add.
+
+        Returns:
+            Id of the newly added url.
+        """
         query = "INSERT INTO urls (url) VALUES (%s) RETURNING id"
         params = (url,)
         return self.execute_query(query, params)[0]
@@ -109,6 +117,10 @@ class CheckRepository:
         return self.execute_query(query, params, cursor_factory=RealDictCursor)
 
     def show_urls(self) -> dict:
+        """
+        Returns data about all urls in database that shows:
+        url id, url, date of last check and status code of page.
+        """
         query = """SELECT 
                 urls.id AS id, 
                 urls.url AS url, 
