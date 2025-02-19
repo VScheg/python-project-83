@@ -5,7 +5,6 @@ from flask import (
     url_for,
     redirect,
     flash,
-    get_flashed_messages,
 )
 
 import os

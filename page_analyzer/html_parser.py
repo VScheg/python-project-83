@@ -4,7 +4,8 @@ from bs4 import BeautifulSoup
 
 def get_seo(url: str) -> dict[str, str | int]:
     """
-    Gets from url HTML page and returns SEO parameters - h1, title, description and status code of page.
+    Gets from url HTML page and returns SEO parameters - h1, title, description
+    and status code of page.
     """
     response = requests.get(url)
     response.raise_for_status()

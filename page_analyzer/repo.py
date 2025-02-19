@@ -1,5 +1,5 @@
 import psycopg2
-from psycopg2.extras import NamedTupleCursor, RealDictCursor
+from psycopg2.extras import NamedTupleCursor
 
 
 class UrlRepository:
@@ -10,7 +10,7 @@ class UrlRepository:
             self,
             query: str,
             params: tuple[str | int] | None,
-    ) -> tuple[str | int] | list[tuple [str | int]] | None:
+    ) -> tuple[str | int] | list[tuple[str | int]] | None:
         """
         Executes a query against the database.
         Args:
