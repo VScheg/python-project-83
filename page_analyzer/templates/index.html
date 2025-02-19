@@ -18,14 +18,14 @@
     <tbody>
     {% for url in urls %}
     <tr>
-      <td>{{ url.get('id') }}</td>
+      <td>{{ url.id }}</td>
       <td>
-        <a href="{{ url_for('show_info', id=url.get('id')) }}">
-          {{ url.get('url') }}
+        <a href="{{ url_for('show_info', id=url.id) }}">
+          {{ url.url }}
         </a>
       </td>
-      <td>{{ url.get('last_check') }}</td>
-      <td>{{ url.get('status_code') }}</td>
+      <td>{{ url.last_check }}</td>
+      <td>{{ url.status_code }}</td>
     </tr>
     {% endfor %}
     </tbody>

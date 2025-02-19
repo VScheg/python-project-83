@@ -18,8 +18,8 @@
         </div>
     </nav>
 </header>
-{% if messages %}
-  {% for category, message in messages %}
+{% if get_flashed_messages() %}
+  {% for category, message in get_flashed_messages(True) %}
     <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
   {% endfor %}
 {% endif %}

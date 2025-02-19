@@ -10,9 +10,10 @@ from flask import (
 
 import os
 from dotenv import load_dotenv
+import psycopg2
 
 from page_analyzer.validator import validate_url, normalize_url
-from page_analyzer.html_parser import parse_html
+from page_analyzer.html_parser import get_seo
 from page_analyzer.repo import UrlRepository, CheckRepository
 
 
@@ -22,14 +23,12 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 DATABASE_URL = os.getenv('DATABASE_URL')
 
-url_repo = UrlRepository(DATABASE_URL)
-check_repo = CheckRepository(DATABASE_URL)
+conn = psycopg2.connect(DATABASE_URL)
 
 
 @app.route('/')
 def index():
-    messages = get_flashed_messages(with_categories=True)
-    return render_template('base/index.html', messages=messages)
+    return render_template('base/index.html')
 
 
 @app.errorhandler(404)
@@ -46,13 +45,14 @@ def url_post():
     redirect to url page if url validated,
     flash messages depending on url validation and presence in database.
     """
+    url_repo = UrlRepository(conn)
     data = request.form.to_dict()
-    urls_data = check_repo.show_urls()
+    urls_data = url_repo.show_urls()
     url = data.get('url')
     if validate_url(url):
         normalized_url = normalize_url(url)
         for item in urls_data:
-            if normalized_url == item.get('url'):
+            if normalized_url == item.url:
                 id = url_repo.get_url_id(normalized_url)
                 flash('Страница уже существует', 'info')
                 break
@@ -63,25 +63,20 @@ def url_post():
         return redirect(url_for('show_info', id=id))
     else:
         flash('Некорректный URL', 'danger')
-        messages = get_flashed_messages(with_categories=True)
-        return render_template('base/index.html', messages=messages), 422
+        return render_template('base/index.html'), 422
 
 
 @app.route('/urls/<int:id>', methods=['GET', 'POST'])
 def show_info(id: int):
-    messages = get_flashed_messages(with_categories=True)
+    url_repo = UrlRepository(conn)
     url_info = url_repo.url_info(id)
 
     if url_info is None:
         return render_template('404.html'), 404
 
+    check_repo = CheckRepository(conn)
     checks = check_repo.show_checks(id)
-    return render_template(
-        'show.html',
-        url_info=url_info,
-        checks=checks,
-        messages=messages
-    )
+    return render_template('show.html', url_info=url_info, checks=checks)
 
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
@@ -93,8 +88,10 @@ def add_check(id: int):
     flash messages depending on presence of exceptions.
     """
     try:
+        url_repo = UrlRepository(conn)
         url = url_repo.get_url(id)
-        url_check = parse_html(url)
+        url_check = get_seo(url)
+        check_repo = CheckRepository(conn)
         check_repo.add_check(url_check, id)
         flash('Страница успешно проверена', 'success')
     except Exception:
@@ -105,9 +102,6 @@ def add_check(id: int):
 
 @app.route('/urls')
 def show_urls():
-    urls = check_repo.show_urls()
-    for url in urls:
-        for key, value in url.items():
-            if value is None:
-                url[key] = ''
+    url_repo = UrlRepository(conn)
+    urls = url_repo.show_urls()
     return render_template('index.html', urls=urls)

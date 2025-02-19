@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container-lg mt-3">
-      <h1>Сайт: {{ url_info.get('url') }}</h1>
+      <h1>Сайт: {{ url_info.url }}</h1>
 
 
   <div class="table-responsive">
@@ -10,22 +10,22 @@
       <tbody>
         <tr>
           <td>ID</td>
-          <td>{{ url_info.get('id') }}</td>
+          <td>{{ url_info.id }}</td>
         </tr>
         <tr>
           <td>Имя</td>
-          <td>{{ url_info.get('url') }}</td>
+          <td>{{ url_info.url }}</td>
         </tr>
         <tr>
           <td>Дата создания</td>
-          <td>{{ url_info.get('created_at') }}</td>
+          <td>{{ url_info.created_at }}</td>
         </tr>
       </tbody>
     </table>
   </div>
 
     <h2 class="mt-5 mb-3">Проверки</h2>
-    <form method="post" action="{{ url_for('add_check', id=url_info.get('id')) }}">
+    <form method="post" action="{{ url_for('add_check', id=url_info.id) }}">
     <input type="submit" class="btn btn-primary" value="Запустить проверку">
     </form>
 
@@ -44,12 +44,12 @@
       <tbody>
       {% for check in checks %}
       <tr>
-        <td>{{ check.get('id') }}</td>
-        <td>{{ check.get('status_code') }}</td>
-        <td>{{ check.get('h1') }}</td>
-        <td>{{ check.get('title') }}</td>
-        <td>{{ check.get('description') }}</td>
-        <td>{{ check.get('created_at') }}</td>
+        <td>{{ check.id }}</td>
+        <td>{{ check.status_code }}</td>
+        <td>{{ check.h1 }}</td>
+        <td>{{ check.title }}</td>
+        <td>{{ check.description }}</td>
+        <td>{{ check.created_at }}</td>
       </tr>
       {% endfor %}
     </tbody>
