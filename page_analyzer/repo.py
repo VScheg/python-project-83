@@ -92,7 +92,10 @@ class CheckRepository:
                 cur.execute(query, params)
                 return None
 
-    def show_checks(self, url_id: int) -> tuple[str | int] | list[tuple[str | int]] | None:
+    def show_checks(
+            self,
+            url_id: int
+    ) -> tuple[str | int] | list[tuple[str | int]] | None:
         with self.connection as conn:
             with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
                 cur.execute(
