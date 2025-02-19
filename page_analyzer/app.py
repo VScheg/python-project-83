@@ -26,6 +26,7 @@ conn = psycopg2.connect(DATABASE_URL)
 url_repo = UrlRepository(conn)
 check_repo = CheckRepository(conn)
 
+
 @app.route('/')
 def index():
     return render_template('base/index.html')
