@@ -22,9 +22,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 DATABASE_URL = os.getenv('DATABASE_URL')
 
-conn = psycopg2.connect(DATABASE_URL)
-url_repo = UrlRepository(conn)
-check_repo = CheckRepository(conn)
+url_repo = UrlRepository(DATABASE_URL)
+check_repo = CheckRepository(DATABASE_URL)
 
 
 @app.route('/')
