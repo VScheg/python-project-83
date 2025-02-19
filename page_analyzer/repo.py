@@ -26,9 +26,7 @@ class UrlRepository:
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
                 cur.execute(query, params)
-                result = cur.fetchall()
-            conn.commit()
-            return result
+                return cur.fetchall()
 
     def add_url(self, url: str) -> int:
         """
@@ -98,8 +96,7 @@ class CheckRepository:
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
                 cur.execute(query, params)
-            conn.commit()
-        return None
+                return None
 
     def show_checks(
             self,
@@ -111,6 +108,4 @@ class CheckRepository:
                     "SELECT * FROM checks WHERE url_id = %s",
                     (url_id,)
                 )
-                result = cur.fetchall()
-            conn.commit()
-        return result
+                return cur.fetchall()
