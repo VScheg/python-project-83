@@ -19,7 +19,6 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-DATABASE_URL = os.getenv('DATABASE_URL')
 
 
 @app.route('/')
@@ -41,7 +40,7 @@ def url_post():
     redirect to url page if url validated,
     flash messages depending on url validation and presence in database.
     """
-    url_repo = UrlRepository(DATABASE_URL)
+    url_repo = UrlRepository()
     data = request.form.to_dict()
     urls_data = url_repo.show_urls()
     url = data.get('url')
@@ -64,13 +63,13 @@ def url_post():
 
 @app.route('/urls/<int:id>', methods=['GET', 'POST'])
 def show_info(id: int):
-    url_repo = UrlRepository(DATABASE_URL)
+    url_repo = UrlRepository()
     url_info = url_repo.url_info(id)
 
     if url_info is None:
         return render_template('404.html'), 404
 
-    check_repo = CheckRepository(DATABASE_URL)
+    check_repo = CheckRepository()
     checks = check_repo.show_checks(id)
     return render_template('show.html', url_info=url_info, checks=checks)
 
@@ -84,10 +83,10 @@ def add_check(id: int):
     flash messages depending on presence of exceptions.
     """
     try:
-        url_repo = UrlRepository(DATABASE_URL)
+        url_repo = UrlRepository()
         url = url_repo.get_url(id)
         url_check = get_seo(url)
-        check_repo = CheckRepository(DATABASE_URL)
+        check_repo = CheckRepository()
         check_repo.add_check(url_check, id)
         flash('Страница успешно проверена', 'success')
     except Exception:
@@ -98,6 +97,6 @@ def add_check(id: int):
 
 @app.route('/urls')
 def show_urls():
-    url_repo = UrlRepository(DATABASE_URL)
+    url_repo = UrlRepository()
     urls = url_repo.show_urls()
     return render_template('index.html', urls=urls)

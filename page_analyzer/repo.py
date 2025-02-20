@@ -1,13 +1,17 @@
+import os
+from dotenv import load_dotenv
+
 import psycopg2
 from psycopg2.extras import NamedTupleCursor
 
 
-class UrlRepository:
-    def __init__(self, db_url: str):
-        self.db_url = db_url
+load_dotenv()
+DATABASE_URL = os.getenv('DATABASE_URL')
 
-    def get_connection(self):
-        return psycopg2.connect(self.db_url)
+
+class UrlRepository:
+    def __init__(self):
+        self.connection = psycopg2.connect(DATABASE_URL)
 
     def execute_query(
             self,
@@ -23,7 +27,7 @@ class UrlRepository:
         Returns:
             The result of the query.
         """
-        with self.get_connection() as conn:
+        with self.connection as conn:
             with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
                 cur.execute(query, params)
                 return cur.fetchall()
@@ -76,11 +80,8 @@ class UrlRepository:
 
 
 class CheckRepository:
-    def __init__(self, db_url: str):
-        self.db_url = db_url
-
-    def get_connection(self):
-        return psycopg2.connect(self.db_url)
+    def __init__(self):
+        self.connection = psycopg2.connect(DATABASE_URL)
 
     def add_check(self, url_check: dict, url_id: int) -> None:
         query = """INSERT INTO checks
@@ -93,7 +94,7 @@ class CheckRepository:
             url_check.get('title'),
             url_check.get('description')
         )
-        with self.get_connection() as conn:
+        with self.connection as conn:
             with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
                 cur.execute(query, params)
                 return None
@@ -102,7 +103,7 @@ class CheckRepository:
             self,
             url_id: int
     ) -> tuple[str | int] | list[tuple[str | int]] | None:
-        with self.get_connection() as conn:
+        with self.connection as conn:
             with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
                 cur.execute(
                     "SELECT * FROM checks WHERE url_id = %s",
