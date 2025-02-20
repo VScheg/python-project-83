@@ -4,15 +4,26 @@ from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import NamedTupleCursor
 
+from contextlib import contextmanager
+
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
-class UrlRepository:
-    def __init__(self):
-        self.connection = psycopg2.connect(DATABASE_URL)
+@contextmanager
+def get_connection():
+    try:
+        connection = psycopg2.connect(DATABASE_URL)
+        yield connection
+    except Exception:
+        connection.rollback()
+    finally:
+        if connection:
+            connection.close()
 
+
+class UrlRepository:
     def execute_query(
             self,
             query: str,
@@ -27,7 +38,7 @@ class UrlRepository:
         Returns:
             The result of the query.
         """
-        with self.connection as conn:
+        with get_connection() as conn:
             with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
                 cur.execute(query, params)
                 return cur.fetchall()
@@ -48,7 +59,10 @@ class UrlRepository:
     def url_info(self, url_id: int) -> tuple[str | int] | None:
         query = "SELECT * FROM urls WHERE id = %s"
         params = (url_id,)
-        return self.execute_query(query, params)[0]
+        try:
+            return self.execute_query(query, params)[0]
+        except IndexError:
+            return None
 
     def get_url_id(self, url: str) -> int:
         query = "SELECT id FROM urls WHERE url = %s"
@@ -80,9 +94,6 @@ class UrlRepository:
 
 
 class CheckRepository:
-    def __init__(self):
-        self.connection = psycopg2.connect(DATABASE_URL)
-
     def add_check(self, url_check: dict, url_id: int) -> None:
         query = """INSERT INTO checks
         (status_code, url_id, h1, title, description)
@@ -94,7 +105,7 @@ class CheckRepository:
             url_check.get('title'),
             url_check.get('description')
         )
-        with self.connection as conn:
+        with get_connection() as conn:
             with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
                 cur.execute(query, params)
                 return None
@@ -103,7 +114,7 @@ class CheckRepository:
             self,
             url_id: int
     ) -> tuple[str | int] | list[tuple[str | int]] | None:
-        with self.connection as conn:
+        with get_connection() as conn:
             with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
                 cur.execute(
                     "SELECT * FROM checks WHERE url_id = %s",
