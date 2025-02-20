@@ -2,8 +2,14 @@ from validators.url import url as validate
 from urllib.parse import urlparse
 
 
-def validate_url(url: str) -> bool:
-    return True if url and validate(url) and len(url) < 256 else False
+def validate_url(url: str) -> str:
+    if not url:
+        return 'Введите URL'
+    if len(url) > 255:
+        return 'URL превышает 255 символов'
+    if not validate(url):
+        return 'Некорректный URL'
+    return 'OK'
 
 
 def normalize_url(url: str) -> str:

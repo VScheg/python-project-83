@@ -45,7 +45,7 @@ def url_post():
     data = request.form.to_dict()
     urls_data = url_repo.show_urls()
     url = data.get('url')
-    if validate_url(url):
+    if validate_url(url) == 'OK':
         normalized_url = normalize_url(url)
         for item in urls_data:
             if normalized_url == item.url:
@@ -58,7 +58,7 @@ def url_post():
 
         return redirect(url_for('show_info', id=id))
     else:
-        flash('Некорректный URL', 'danger')
+        flash(validate_url(url), 'danger')
         return render_template('base/index.html'), 422
 
 
