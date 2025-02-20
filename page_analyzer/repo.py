@@ -13,9 +13,11 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 
 @contextmanager
 def get_connection():
+    connection = ''
     try:
         connection = psycopg2.connect(DATABASE_URL)
         yield connection
+        connection.commit()
     except Exception:
         connection.rollback()
     finally:
