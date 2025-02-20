@@ -92,7 +92,6 @@ class CheckRepository:
         )
         return execute_query(query, params, need_return=False)
 
-
     def show_checks(
             self,
             url_id: int
