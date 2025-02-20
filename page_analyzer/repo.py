@@ -9,29 +9,28 @@ load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
+def execute_query(
+        query: str,
+        params: tuple[str | int] | tuple | None,
+        need_return: bool = True,
+) -> tuple[str | int] | list[tuple[str | int]] | None:
+    """
+    Executes a query against the database.
+    Args:
+        query: The query to execute.
+        params: The parameters to pass to the query.
+        need_return: Whether the query should return result or not.
+
+    Returns:
+        The result of the query.
+    """
+    with psycopg2.connect(DATABASE_URL) as conn:
+        with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
+            cur.execute(query, params)
+            return cur.fetchall() if need_return else None
+
+
 class UrlRepository:
-    def __init__(self):
-        self.connection = psycopg2.connect(DATABASE_URL)
-
-    def execute_query(
-            self,
-            query: str,
-            params: tuple[str | int] | None,
-    ) -> tuple[str | int] | list[tuple[str | int]] | None:
-        """
-        Executes a query against the database.
-        Args:
-            query: The query to execute.
-            params: The parameters to pass to the query.
-
-        Returns:
-            The result of the query.
-        """
-        with self.connection as conn:
-            with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
-                cur.execute(query, params)
-                return cur.fetchall()
-
     def add_url(self, url: str) -> int:
         """
         Adds a new url to the database.
@@ -43,22 +42,22 @@ class UrlRepository:
         """
         query = "INSERT INTO urls (url) VALUES (%s) RETURNING id"
         params = (url,)
-        return self.execute_query(query, params)[0][0]
+        return execute_query(query, params)[0][0]
 
     def url_info(self, url_id: int) -> tuple[str | int] | None:
         query = "SELECT * FROM urls WHERE id = %s"
         params = (url_id,)
-        return self.execute_query(query, params)[0]
+        return execute_query(query, params)[0]
 
     def get_url_id(self, url: str) -> int:
         query = "SELECT id FROM urls WHERE url = %s"
         params = (url,)
-        return self.execute_query(query, params)[0][0]
+        return execute_query(query, params)[0][0]
 
     def get_url(self, url_id: int) -> str:
         query = "SELECT url FROM urls WHERE id = %s"
         params = (url_id,)
-        return self.execute_query(query, params)[0][0]
+        return execute_query(query, params)[0][0]
 
     def show_urls(self) -> tuple[str | int] | list[tuple[str | int]] | None:
         """
@@ -76,13 +75,10 @@ class UrlRepository:
                 )
                 ORDER BY id DESC"""
         params = None
-        return self.execute_query(query, params)
+        return execute_query(query, params)
 
 
 class CheckRepository:
-    def __init__(self):
-        self.connection = psycopg2.connect(DATABASE_URL)
-
     def add_check(self, url_check: dict, url_id: int) -> None:
         query = """INSERT INTO checks
         (status_code, url_id, h1, title, description)
@@ -94,19 +90,13 @@ class CheckRepository:
             url_check.get('title'),
             url_check.get('description')
         )
-        with self.connection as conn:
-            with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
-                cur.execute(query, params)
-                return None
+        return execute_query(query, params, need_return=False)
+
 
     def show_checks(
             self,
             url_id: int
     ) -> tuple[str | int] | list[tuple[str | int]] | None:
-        with self.connection as conn:
-            with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
-                cur.execute(
-                    "SELECT * FROM checks WHERE url_id = %s",
-                    (url_id,)
-                )
-                return cur.fetchall()
+        query = "SELECT * FROM checks WHERE url_id = %s"
+        params = (url_id,)
+        return execute_query(query, params)
