@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
+
 def parse_html(response: requests.models.Response) -> dict[str, str | int]:
     """
     Returns from HTML page SEO parameters - h1, title, description.
