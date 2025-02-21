@@ -10,9 +10,11 @@ from flask import (
 import os
 from dotenv import load_dotenv
 
-from page_analyzer.validator import validate_url, normalize_url
-from page_analyzer.html_parser import get_seo
+from page_analyzer.validator import get_error, normalize_url
+from page_analyzer.html_parser import parse_html
 from page_analyzer.repo import UrlRepository, CheckRepository
+
+import requests
 
 
 load_dotenv()
@@ -40,37 +42,32 @@ def url_post():
     redirect to url page if url validated,
     flash messages depending on url validation and presence in database.
     """
-    url_repo = UrlRepository()
     data = request.form.to_dict()
-    urls_data = url_repo.show_urls()
     url = data.get('url')
-    if validate_url(url) == 'OK':
+    error = get_error(url)
+    if not error:
         normalized_url = normalize_url(url)
-        for item in urls_data:
-            if normalized_url == item.url:
-                id = url_repo.get_url_id(normalized_url)
-                flash('Страница уже существует', 'info')
-                break
+        if UrlRepository.has_url(normalized_url):
+            id = UrlRepository.get_url_id(normalized_url)
+            flash('Страница уже существует', 'info')
         else:
-            id = url_repo.add_url(normalized_url)
+            id = UrlRepository.add_url(normalized_url)
             flash('Страница успешно добавлена', 'success')
 
         return redirect(url_for('show_info', id=id))
     else:
-        flash(validate_url(url), 'danger')
+        flash(error, 'danger')
         return render_template('base/index.html'), 422
 
 
 @app.route('/urls/<int:id>', methods=['GET', 'POST'])
 def show_info(id: int):
-    url_repo = UrlRepository()
-    url_info = url_repo.url_info(id)
+    url_info = UrlRepository.url_info(id)
 
     if url_info is None:
         return render_template('404.html'), 404
 
-    check_repo = CheckRepository()
-    checks = check_repo.show_checks(id)
+    checks = CheckRepository.show_checks(id)
     return render_template('show.html', url_info=url_info, checks=checks)
 
 
@@ -83,13 +80,14 @@ def add_check(id: int):
     flash messages depending on presence of exceptions.
     """
     try:
-        url_repo = UrlRepository()
-        url = url_repo.get_url(id)
-        url_check = get_seo(url)
-        check_repo = CheckRepository()
-        check_repo.add_check(url_check, id)
+        url = UrlRepository.get_url(id)
+        response = requests.get(url)
+        response.raise_for_status()
+        url_check = parse_html(response)
+        url_check['status_code'] = response.status_code
+        CheckRepository.add_check(url_check, id)
         flash('Страница успешно проверена', 'success')
-    except Exception:
+    except requests.exceptions.RequestException:
         flash('Произошла ошибка при проверке', 'danger')
 
     return redirect(url_for('show_info', id=id))
@@ -97,6 +95,5 @@ def add_check(id: int):
 
 @app.route('/urls')
 def show_urls():
-    url_repo = UrlRepository()
-    urls = url_repo.show_urls()
+    urls = UrlRepository.show_urls()
     return render_template('index.html', urls=urls)
