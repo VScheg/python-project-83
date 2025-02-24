@@ -19,6 +19,7 @@ def parse_html(response: requests.models.Response) -> dict[str, str | int]:
     ) else ''
 
     return {
+        'status_code': response.status_code,
         'h1': h1,
         'title': title,
         'description': description,
