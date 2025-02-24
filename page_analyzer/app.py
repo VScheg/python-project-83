@@ -10,7 +10,7 @@ from flask import (
 import os
 from dotenv import load_dotenv
 
-from page_analyzer.validator import get_error, normalize_url
+from page_analyzer.validator import validate_url, normalize_url
 from page_analyzer.html_parser import parse_html
 from page_analyzer.repo import UrlRepository, CheckRepository
 
@@ -44,20 +44,19 @@ def url_post():
     """
     data = request.form.to_dict()
     url = data.get('url')
-    error = get_error(url)
+    error = validate_url(url)
     if not error:
         normalized_url = normalize_url(url)
-        if UrlRepository.has_url(normalized_url):
-            id = UrlRepository.get_url_id(normalized_url)
+        if (id := UrlRepository.get_url_id(normalized_url)):
             flash('Страница уже существует', 'info')
         else:
             id = UrlRepository.add_url(normalized_url)
             flash('Страница успешно добавлена', 'success')
 
         return redirect(url_for('show_info', id=id))
-    else:
-        flash(error, 'danger')
-        return render_template('base/index.html'), 422
+
+    flash(error, 'danger')
+    return render_template('base/index.html'), 422
 
 
 @app.route('/urls/<int:id>', methods=['GET', 'POST'])
@@ -79,16 +78,18 @@ def add_check(id: int):
     show page with url and checks information,
     flash messages depending on presence of exceptions.
     """
+    url = UrlRepository.get_url(id)
     try:
-        url = UrlRepository.get_url(id)
         response = requests.get(url)
         response.raise_for_status()
-        url_check = parse_html(response)
-        url_check['status_code'] = response.status_code
-        CheckRepository.add_check(url_check, id)
-        flash('Страница успешно проверена', 'success')
+
     except requests.exceptions.RequestException:
         flash('Произошла ошибка при проверке', 'danger')
+
+    else:
+        url_check = parse_html(response)
+        CheckRepository.add_check(url_check, id)
+        flash('Страница успешно проверена', 'success')
 
     return redirect(url_for('show_info', id=id))
 
