@@ -64,10 +64,9 @@ class UrlRepository:
     def url_info(cls, url_id: int) -> tuple[str | int] | None:
         query = "SELECT * FROM urls WHERE id = %s"
         params = (url_id,)
-        try:
-            return cls._execute_query(query, params)[0]
-        except IndexError:
-            return
+        result = cls._execute_query(query, params)
+        if result:
+            return result[0]
 
     @classmethod
     def get_url_id(cls, url: str) -> int | None:
