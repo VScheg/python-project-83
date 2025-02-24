@@ -70,22 +70,18 @@ class UrlRepository:
             return
 
     @classmethod
-    def get_url_id(cls, url: str) -> int:
+    def get_url_id(cls, url: str) -> int | None:
         query = "SELECT id FROM urls WHERE url = %s"
         params = (url,)
-        return cls._execute_query(query, params)[0].id
+        result = cls._execute_query(query, params)
+        if result:
+            return result[0].id
 
     @classmethod
     def get_url(cls, url_id: int) -> str:
         query = "SELECT url FROM urls WHERE id = %s"
         params = (url_id,)
         return cls._execute_query(query, params)[0].url
-
-    @classmethod
-    def has_url(cls, url: str) -> bool:
-        query = "SELECT EXISTS (SELECT url FROM urls WHERE url = %s)"
-        params = (url,)
-        return cls._execute_query(query, params)[0].exists
 
     @classmethod
     def show_urls(cls) -> tuple[str | int] | list[tuple[str | int]] | None:
