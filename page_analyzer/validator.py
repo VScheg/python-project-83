@@ -2,7 +2,7 @@ from validators.url import url as validate
 from urllib.parse import urlparse
 
 
-def get_error(url: str) -> str | None:
+def validate_url(url: str) -> str | None:
     if not url:
         return 'Введите URL'
     if len(url) > 255:
