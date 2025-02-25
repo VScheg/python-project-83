@@ -50,7 +50,7 @@ def url_post():
         return render_template('base/index.html'), 422
 
     normalized_url = normalize_url(url)
-    if (id := UrlRepository.get_url_id(normalized_url)):
+    if id := UrlRepository.get_url_id(normalized_url):
         flash('Страница уже существует', 'info')
     else:
         id = UrlRepository.add_url(normalized_url)
