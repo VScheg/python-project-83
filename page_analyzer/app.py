@@ -45,18 +45,18 @@ def url_post():
     data = request.form.to_dict()
     url = data.get('url')
     error = validate_url(url)
-    if not error:
-        normalized_url = normalize_url(url)
-        if (id := UrlRepository.get_url_id(normalized_url)):
-            flash('Страница уже существует', 'info')
-        else:
-            id = UrlRepository.add_url(normalized_url)
-            flash('Страница успешно добавлена', 'success')
+    if error:
+        flash(error, 'danger')
+        return render_template('base/index.html'), 422
 
-        return redirect(url_for('show_info', id=id))
+    normalized_url = normalize_url(url)
+    if (id := UrlRepository.get_url_id(normalized_url)):
+        flash('Страница уже существует', 'info')
+    else:
+        id = UrlRepository.add_url(normalized_url)
+        flash('Страница успешно добавлена', 'success')
 
-    flash(error, 'danger')
-    return render_template('base/index.html'), 422
+    return redirect(url_for('show_info', id=id))
 
 
 @app.route('/urls/<int:id>', methods=['GET', 'POST'])
